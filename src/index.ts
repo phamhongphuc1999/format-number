@@ -2,5 +2,5 @@ export * from './types';
 
 export * from './utils';
 
-export * from './round';
-export * from './fn';
+export { FN } from './fn';
+export { round } from './round';

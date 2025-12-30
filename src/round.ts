@@ -1,128 +1,119 @@
 import type { NumberType, RoundingConfigType } from './types';
+import { removeZero } from './utils';
 
-export function roundHalf(value: NumberType, precision = 0): string {
-  const str = String(value);
-
-  const sign = str.startsWith('-') ? '-' : '';
-  const abs = sign ? str.slice(1) : str;
-
-  const [intPart, frac = ''] = abs.split('.');
-
-  const digitToRound = Number(frac[precision] ?? '0');
-
-  const beforeRound = frac
-    .slice(0, precision)
-    .split('')
-    .reduce((acc, d) => acc * 10 + Number(d), 0);
-
-  let rounded = beforeRound;
-  if (digitToRound >= 5) rounded += 1;
-
-  let newFrac = rounded.toString().padStart(precision, '0');
-
-  if (newFrac.length > precision) {
-    const newInt = (Number(intPart) + 1).toString();
-    newFrac = newFrac.slice(1);
-    return (sign ? '-' : '') + newInt + (precision > 0 ? '.' + newFrac : '');
+function plusOne(value: string) {
+  let result = '';
+  let counter = value.length - 1;
+  let remaining = '1';
+  while (counter >= 0) {
+    const digit = value[counter];
+    let total = Number(digit) + (remaining ? 1 : 0);
+    if (total >= 10) {
+      remaining = '1';
+      total -= 10;
+    } else remaining = '';
+    result = total.toString() + result;
+    counter--;
   }
-
-  return (sign ? '-' : '') + intPart + (precision > 0 ? '.' + newFrac : '');
+  return { result: remaining + result, remaining };
 }
 
-export function roundUp(value: NumberType, precision = 0) {
-  const str = String(value);
-
-  const sign = str.startsWith('-') ? '-' : '';
-  const abs = sign ? str.slice(1) : str;
-
-  const [intPart, frac = ''] = abs.split('.');
-
-  if (precision === 0) return sign + (frac ? String(Number(intPart) + 1) : intPart);
-
-  const kept = frac.slice(0, precision).padEnd(precision, '0');
-  const rest = frac.slice(precision);
-
-  if (!rest || /^0*$/.test(rest)) return sign + intPart + '.' + kept;
-
-  let carry = 1;
-  const digits = kept.split('');
-
-  for (let i = digits.length - 1; i >= 0 && carry; i--) {
-    const sum = Number(digits[i]) + carry;
-    digits[i] = String(sum % 10);
-    carry = Math.floor(sum / 10);
+export function roundPositiveHalf(value: string, precision = 0): string {
+  const [intPart, fracPart = ''] = value.split('.');
+  if (precision === 0) {
+    if (fracPart) {
+      if (Number(fracPart[0]) >= 5) return plusOne(intPart).result;
+      else return intPart;
+    }
+    return intPart;
   }
-
-  let resultInt = intPart;
-  if (carry) resultInt = String(Number(resultInt) + 1);
-
-  return sign + resultInt + '.' + digits.join('');
+  if (precision >= fracPart.length) return intPart + (fracPart ? `.${fracPart}` : '');
+  const fracPartRound = fracPart.slice(0, precision);
+  const fracPartRest = fracPart.slice(precision);
+  if (Number(fracPartRest[0]) >= 5) {
+    const _fracPartRound = plusOne(fracPartRound);
+    if (!_fracPartRound.remaining) return intPart + '.' + _fracPartRound.result;
+    return plusOne(intPart).result;
+  } else return intPart + '.' + fracPartRound;
 }
 
-export function roundDown(value: NumberType, precision = 0): string {
-  const str = String(value);
-
-  const sign = str.startsWith('-') ? '-' : '';
-  const abs = sign ? str.slice(1) : str;
-
-  const [intPart, frac = ''] = abs.split('.');
-  if (precision === 0) return sign + intPart;
-  const kept = frac.slice(0, precision).padEnd(precision, '0');
-  return sign + intPart + '.' + kept;
+function roundPositiveUp(value: string, precision = 0): string {
+  const [intPart, fracPart = ''] = value.split('.');
+  if (precision === 0) {
+    if (!fracPart) return intPart;
+    else return plusOne(intPart).result;
+  }
+  if (precision >= fracPart.length) return intPart + '.' + fracPart;
+  const fracPartRound = plusOne(fracPart.slice(0, precision));
+  if (!fracPartRound.remaining) return intPart + '.' + fracPartRound.result;
+  return plusOne(intPart).result;
 }
 
-export function roundTruncate(value: NumberType, precision = 0): string {
-  const str = String(value);
-
-  const sign = str.startsWith('-') ? '-' : '';
-  const abs = sign ? str.slice(1) : str;
-
-  const [intPart, frac = ''] = abs.split('.');
-
-  if (precision === 0) return sign + intPart;
-  const kept = frac.slice(0, precision).padEnd(precision, '0');
-  return sign + intPart + '.' + kept;
+function roundPositiveDown(value: string, precision = 0): string {
+  const [intPart, fracPart = ''] = value.split('.');
+  if (precision === 0) return intPart;
+  let fracPartRound = fracPart.slice(0, precision);
+  let counter = fracPartRound.length - 1;
+  while (counter >= 0 && fracPartRound[counter] == '0') counter--;
+  fracPartRound = fracPartRound.slice(0, counter + 1);
+  return intPart + (fracPartRound ? `.${fracPartRound}` : '');
 }
 
-export function roundBanker(value: NumberType, precision = 0): string {
-  const str = String(value);
-
-  const sign = str.startsWith('-') ? '-' : '';
-  const abs = sign ? str.slice(1) : str;
-
-  const [intPart, frac = ''] = abs.split('.');
-
-  const kept = frac.slice(0, precision).padEnd(precision, '0');
-  const next = frac[precision];
-  const rest = frac.slice(precision + 1);
-
-  if (next === '5' && (!rest || /^0*$/.test(rest))) {
-    const lastDigit = precision ? Number(kept[precision - 1]) : Number(intPart[intPart.length - 1]);
-    if (lastDigit % 2 === 1) return roundUp(value, precision);
-  } else if (next && next > '5') return roundUp(value, precision);
-
-  return sign + intPart + (precision ? '.' + kept : '');
+function roundPositiveBanker(value: string, precision = 0): string {
+  const [intPart, fracPart = ''] = value.split('.');
+  if (precision === 0) {
+    if (fracPart) {
+      if (Number(fracPart[0]) >= 5) {
+        if (Number(intPart[0]) / 2 == 0) return intPart;
+        return plusOne(intPart).result;
+      } else return intPart;
+    }
+    return intPart;
+  }
+  if (precision >= fracPart.length) return intPart + (fracPart ? `.${fracPart}` : '');
+  const fracPartRound = fracPart.slice(0, precision);
+  const fracPartRest = fracPart.slice(precision);
+  if (fracPartRest[0] == '5') {
+    if (Number(fracPartRound[fracPartRound.length - 1]) % 2 == 0)
+      return intPart + '.' + fracPartRound;
+    else {
+      const _fracPartRound = plusOne(fracPartRound);
+      if (!_fracPartRound.remaining) return intPart + '.' + _fracPartRound.result;
+      return plusOne(intPart).result;
+    }
+  } else if (Number(fracPartRest[0]) > 5) {
+    const _fracPartRound = plusOne(fracPartRound);
+    if (!_fracPartRound.remaining) return intPart + '.' + _fracPartRound.result;
+    return plusOne(intPart).result;
+  } else return intPart + '.' + fracPartRound;
 }
 
 export function round(value: NumberType, options: RoundingConfigType = {}) {
   const mode = options.mode || 'half';
   const precision = options.precision || 0;
 
+  let str = removeZero(String(value));
+  let sign = '';
+  if (str.startsWith('-')) {
+    str = str.slice(1);
+    sign = '-';
+  }
+
   switch (mode) {
     case 'half':
-      return roundHalf(value, precision);
+      return sign + roundPositiveHalf(str, precision);
 
     case 'up':
-      return roundUp(value, precision);
+      return sign == '' ? roundPositiveUp(str, precision) : '-' + roundPositiveDown(str, precision);
 
     case 'down':
-      return roundDown(value, precision);
+      return sign == '' ? roundPositiveDown(str, precision) : '-' + roundPositiveUp(str, precision);
 
     case 'truncate':
-      return roundTruncate(value, precision);
+      return sign + roundPositiveDown(str, precision);
 
     case 'banker': {
-      return roundBanker(value, precision);
+      return sign + roundPositiveBanker(str, precision);
     }
   }
 }
