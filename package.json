@@ -1,0 +1,65 @@
+{
+  "name": "format-number",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Format number",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun run clear && tsc && vite build",
+    "preview": "vite preview",
+    "clear": "rm -rf dist",
+    "test": "vitest run",
+    "prepare": "bun run build",
+    "eslint": "eslint --config ./eslint.config.js --cache",
+    "format": "prettier --write .",
+    "prepublishOnly": "bun run clear && bun run build && bun run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phamhongphuc1999/format-number.git"
+  },
+  "keywords": [
+    "graphql",
+    "ethereum"
+  ],
+  "author": "phamhongphuc1999",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/phamhongphuc1999/format-number/issues"
+  },
+  "homepage": "https://github.com/phamhongphuc1999/format-number#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@types/node": "^20.12.2",
+    "eslint": "^9.29.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "path": "^0.12.7",
+    "tslib": "^2.6.2",
+    "typescript": "5.5.3",
+    "typescript-eslint": "^8.34.1",
+    "vite": "^7.2.7",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.0.15"
+  },
+  "contributors": [
+    {
+      "name": "Phạm Hồng Phúc",
+      "email": "phamhongphuc12atm1@gmail.com",
+      "url": "https://github.com/phamhongphuc1999"
+    }
+  ],
+  "engines": {
+    "node": ">=16",
+    "npm": ">=7"
+  }
+}
