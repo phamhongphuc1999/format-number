@@ -2,5 +2,6 @@ export * from './types';
 
 export * from './utils';
 
-export { FN } from './fn';
+export { compact } from './compact';
+export { FN, formatNumber } from './format';
 export { round } from './round';

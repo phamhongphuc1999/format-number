@@ -1,8 +1,7 @@
 {
-  "name": "format-number",
-  "private": true,
+  "name": "@peter-present/format-number",
   "version": "0.0.1",
-  "description": "Format number",
+  "description": "Utility library for number formatting, rounding, and compact display.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -25,9 +24,11 @@
     "url": "git+https://github.com/phamhongphuc1999/format-number.git"
   },
   "keywords": [
-    "graphql",
-    "ethereum"
-  ],
+  "number",
+  "format",
+  "number-format",
+  "compact"
+],
   "author": "phamhongphuc1999",
   "license": "ISC",
   "bugs": {
