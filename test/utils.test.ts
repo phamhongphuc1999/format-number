@@ -1,5 +1,5 @@
 import { assert, describe, it } from 'vitest';
-import { formatSmallNum, removeZero } from '../src';
+import { formatScientific, formatSmallNum, removeZero } from '../src';
 
 describe('utils', () => {
   it('removeZero', () => {
@@ -24,5 +24,11 @@ describe('utils', () => {
 
     result = formatSmallNum('-000123.0000000012');
     assert.equal(result, '123.0₈12');
+  });
+  it('formatScientific', () => {
+    let result = formatScientific('12345.6789');
+    assert.equal(result, '1.23456789e+4');
+    result = formatScientific('0.0000123');
+    assert.equal(result, '1.23e-6');
   });
 });

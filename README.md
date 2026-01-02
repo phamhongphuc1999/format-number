@@ -20,13 +20,13 @@ For detailed documentation and advanced usage, visit: [here](https://blog.peter-
 
 ```shell
 # npm
-npm install format-number
+npm install @peter-present/format-number
 
 # yarn
-yarn add format-number
+yarn add @peter-present/format-number
 
 # bun
-bun install format-number
+bun install @peter-present/format-number
 ```
 
 ## Core Functions
@@ -102,14 +102,15 @@ FN(1000000).compact({ precision: 0 }); // '1M'
 
 ### Configuration Options
 
-| Option      | Type           | Description                                      |
-| :---------- | :------------- | :----------------------------------------------- |
-| `precision` | `number`       | Number of decimal places (default: `0`).         |
-| `mode`      | `RoundingMode` | Rounding strategy (default: `'half'`).           |
-| `prefix`    | `string`       | Text to prepend to the result.                   |
-| `suffix`    | `string`       | Text to append to the result.                    |
-| `isCompact` | `boolean`      | If `true`, uses K/M/B/T suffixes.                |
-| `isSmall`   | `boolean`      | If `true`, formats tiny numbers with subscripts. |
+| Option         | Type           | Description                                      |
+| :------------- | :------------- | :----------------------------------------------- |
+| `precision`    | `number`       | Number of decimal places (default: `0`).         |
+| `mode`         | `RoundingMode` | Rounding strategy (default: `'half'`).           |
+| `prefix`       | `string`       | Text to prepend to the result.                   |
+| `suffix`       | `string`       | Text to append to the result.                    |
+| `isCompact`    | `boolean`      | If `true`, uses K/M/B/T suffixes.                |
+| `isSmall`      | `boolean`      | If `true`, formats tiny numbers with subscripts. |
+| `isScientific` | `boolean`      | If `true`, formats scientific notation           |
 
 ## License
 
