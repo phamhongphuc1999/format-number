@@ -88,6 +88,19 @@ function roundPositiveBanker(value: string, precision = 0): string {
   } else return intPart + '.' + fracPartRound;
 }
 
+/**
+ * Rounds a number based on the specified precision and rounding mode.
+ * 
+ * @param value - The value to be rounded. Can be a number, string, or bigint.
+ * @param options - Configuration for rounding.
+ * @param options.mode - The rounding strategy to use ('half', 'up', 'down', 'banker', 'truncate'). Default is 'half'.
+ * @param options.precision - The number of decimal places to round to. Default is 0.
+ * @returns The rounded number as a string.
+ * 
+ * @example
+ * round(123.456, { precision: 2 }); // '123.46'
+ * round(123.45, { mode: 'down', precision: 1 }); // '123.4'
+ */
 export function round(value: NumberType, options: RoundingConfigType = {}) {
   const mode = options.mode || 'half';
   const precision = options.precision || 0;
