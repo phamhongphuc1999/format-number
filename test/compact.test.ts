@@ -17,5 +17,11 @@ describe('Compact', () => {
 
     result = compact('123456789123456789012', { precision: 3 });
     assert.equal(result, '123456.789Q');
+
+    result = compact('123456789123456789012');
+    assert.equal(result, '123456.789123456789012Q');
+
+    result = compact('123');
+    assert.equal(result, '123');
   });
 });

@@ -31,64 +31,64 @@ describe('Round number', () => {
     );
   });
   it('up', () => {
-    let result = round(123.54, { precision: 1, mode: 'up' });
+    let result = round(123.54, { precision: 1, rounding: 'up' });
     assert.equal(result, '123.6');
 
-    result = round(-123.45, { precision: 1, mode: 'up' });
+    result = round(-123.45, { precision: 1, rounding: 'up' });
     assert.equal(result, '-123.4');
 
-    result = round(123.58, { precision: 1, mode: 'up' });
+    result = round(123.58, { precision: 1, rounding: 'up' });
     assert.equal(result, '123.6');
 
-    result = round('123.5800001', { precision: 7, mode: 'up' });
+    result = round('123.5800001', { precision: 7, rounding: 'up' });
     assert.equal(result, '123.5800001');
 
-    result = round('123.58000001', { precision: 7, mode: 'up' });
+    result = round('123.58000001', { precision: 7, rounding: 'up' });
     assert.equal(result, '123.5800001');
 
-    result = round('123.99999999999999', { precision: 7, mode: 'up' });
+    result = round('123.99999999999999', { precision: 7, rounding: 'up' });
     assert.equal(result, '124');
 
-    result = round('123.99', { precision: 7, mode: 'up' });
+    result = round('123.99', { precision: 7, rounding: 'up' });
     assert.equal(result, '123.99');
 
-    result = round('123.58', { precision: 7, mode: 'up' });
+    result = round('123.58', { precision: 7, rounding: 'up' });
     assert.equal(result, '123.58');
   });
   it('down', () => {
-    let result = round(123.54, { precision: 1, mode: 'down' });
+    let result = round(123.54, { precision: 1, rounding: 'down' });
     assert.equal(result, '123.5');
 
-    result = round(-123.45, { precision: 1, mode: 'down' });
+    result = round(-123.45, { precision: 1, rounding: 'down' });
     assert.equal(result, '-123.5');
 
-    result = round(-123.3, { precision: 1, mode: 'down' });
+    result = round(-123.3, { precision: 1, rounding: 'down' });
     assert.equal(result, '-123.3');
 
-    result = round(123.470000000002, { precision: 5, mode: 'down' });
+    result = round(123.470000000002, { precision: 5, rounding: 'down' });
     assert.equal(result, '123.47');
 
-    result = round(-123.470000000002, { precision: 5, mode: 'down' });
+    result = round(-123.470000000002, { precision: 5, rounding: 'down' });
     assert.equal(result, '-123.47001');
   });
   it('truncate', () => {
-    let result = round(123.54, { precision: 1, mode: 'truncate' });
+    let result = round(123.54, { precision: 1, rounding: 'truncate' });
     assert.equal(result, '123.5');
 
-    result = round(-123.45, { precision: 1, mode: 'truncate' });
+    result = round(-123.45, { precision: 1, rounding: 'truncate' });
     assert.equal(result, '-123.4');
 
-    result = round(123.47, { precision: 1, mode: 'truncate' });
+    result = round(123.47, { precision: 1, rounding: 'truncate' });
     assert.equal(result, '123.4');
   });
   it('banker', () => {
-    let result = round(123.54, { precision: 1, mode: 'banker' });
+    let result = round(123.54, { precision: 1, rounding: 'banker' });
     assert.equal(result, '123.5');
 
-    result = round(-123.25, { precision: 1, mode: 'banker' });
+    result = round(-123.25, { precision: 1, rounding: 'banker' });
     assert.equal(result, '-123.2');
 
-    result = round(123.46, { precision: 1, mode: 'banker' });
+    result = round(123.46, { precision: 1, rounding: 'banker' });
     assert.equal(result, '123.5');
   });
 });

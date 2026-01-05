@@ -1,65 +1,83 @@
-import { compact } from './compact';
+import { _compact } from './compact';
+import { convertToObjectNumber } from './io';
+import { scientific, subscript } from './notation';
 import { round } from './round';
-import type { MetadataType, NumberType, OtherMetadataType, RoundingConfigType } from './types';
-import { formatScientific, formatSmallNum } from './utils';
+import type {
+  FormattingConfigType,
+  NotationMode,
+  NumberType,
+  ObjectNumberType,
+  RoundingConfigType,
+} from './types';
 
-function _formatOtherNumber(value: string, options?: OtherMetadataType) {
-  const prefix = options.prefix || '';
-  const suffix = options.suffix || '';
-  const isSmall = options.isSmall || false;
-  const isScientific = options.isScientific || false;
-  const _value = isScientific ? formatScientific(value) : value;
-  return `${prefix}${isSmall ? formatSmallNum(_value) : _value}${suffix}`;
+function _FN(value: ObjectNumberType) {
+  return {
+    round: (options?: RoundingConfigType) => {
+      const roundedValue = round(value.value, options);
+      return _FN({ ...value, value: roundedValue });
+    },
+    compact: (options?: RoundingConfigType) => {
+      if (value.compactedSymbol) return _FN(value);
+      const { value: compactedValue, symbol: compactedSymbol } = _compact(value.value, options);
+      return _FN({ ...value, compactedSymbol, value: compactedValue });
+    },
+    notation(mode: NotationMode = 'scientific') {
+      return _FN({ ...value, notation: mode });
+    },
+    prefix(symbol: string) {
+      return _FN({ ...value, prefix: symbol });
+    },
+    suffix(symbol: string) {
+      return _FN({ ...value, suffix: symbol });
+    },
+    toNumber() {
+      let { value: result } = value;
+      const { sign, prefix, suffix, compactedSymbol } = value;
+      if (value.notation == 'scientific') result = scientific(result);
+      else if (value.notation == 'subscript') result = subscript(result);
+      return `${prefix || ''}${sign}${result}${compactedSymbol || ''}${suffix || ''}`;
+    },
+    toObject() {
+      return value;
+    },
+  };
 }
 
 /**
- * A comprehensive function for formatting numbers with rounding, compacting, and custom metadata.
- * 
- * @param value - The value to format. Can be a number, string, or bigint.
- * @param options - Configuration options for formatting.
- * @param options.precision - Number of decimal places (default: 0).
- * @param options.mode - Rounding strategy (default: 'half').
- * @param options.prefix - Text to prepend to the result (e.g., '$').
- * @param options.suffix - Text to append to the result (e.g., ' units').
- * @param options.isCompact - If true, formats using K/M/B/T suffixes.
- * @param options.isSmall - If true, formats tiny numbers using subscript notation (e.g., 0.0₃5).
- * @returns The formatted number as a string.
- * 
+ * Fluent API for performing multiple formatting operations in a readable chain.
+ * Wraps the input value into a formatter object that supports rounding,
+ * compacting, and metadata addition.
+ *
+ * @param value - The initial value to format.
+ * @returns A chainable formatter object.
+ *
+ * @example
+ * FN('1234567.89')
+ *   .round({ precision: 0 })
+ *   .prefix('$')
+ *   .toNumber(); // '$1234568'
+ */
+export function FN(value: NumberType | ObjectNumberType) {
+  return _FN(convertToObjectNumber(value));
+}
+
+/**
+ * Comprehensive formatting function that combines rounding, compacting, and metadata.
+ * This is the quickest way to format a number with multiple options.
+ *
+ * @param value - The value to format.
+ * @param options - Formatting configuration (precision, rounding, isCompact, prefix, suffix, notation).
+ * @returns The formatted number string.
+ *
  * @example
  * formatNumber(1234.56, { prefix: '$', precision: 1 }); // '$1234.6'
  * formatNumber(1500000, { isCompact: true }); // '1.5M'
  */
-export function formatNumber(value: NumberType, options?: MetadataType) {
-  let result = String(value);
-  if (options.isCompact == true) result = compact(result, options);
-  else if (!options.isSmall) result = round(result, options);
-  return _formatOtherNumber(result, options);
-}
-
-/**
- * Fluent/Chained API for performing multiple formatting operations in a readable way.
- * 
- * @param value - The initial value to start the chain.
- * @returns An object with chainable formatting methods.
- * 
- * @example
- * FN('1234567.89')
- *   .round({ precision: 0 })
- *   .format({ prefix: 'Total: ', suffix: ' tokens' }); // 'Total: 1234568 tokens'
- */
-export function FN(value: NumberType) {
-  return {
-    round(options: RoundingConfigType = {}) {
-      return FN(round(value, options));
-    },
-    compact(options: RoundingConfigType = {}) {
-      return compact(value, options);
-    },
-    format(options: OtherMetadataType = {}) {
-      return _formatOtherNumber(String(value), options);
-    },
-    toString() {
-      return String(value);
-    },
-  };
+export function formatNumber(value: NumberType, options?: FormattingConfigType) {
+  let result = FN(value).round(options);
+  if (options.isCompact) result = result.compact(options);
+  if (options.notation) result = result.notation(options.notation);
+  if (options.prefix) result = result.prefix(options.prefix);
+  if (options.suffix) result = result.suffix(options.suffix);
+  return result.toNumber();
 }

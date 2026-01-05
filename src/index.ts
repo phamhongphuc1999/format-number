@@ -1,7 +1,7 @@
 export * from './types';
 
-export * from './utils';
-
 export { compact } from './compact';
-export { FN, formatNumber } from './format';
+export { FN } from './format';
+export { clearTrailingZero, parseNum } from './io';
+export { scientific, subscript } from './notation';
 export { round } from './round';

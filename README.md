@@ -1,20 +1,19 @@
 # format-number
 
-A lightweight, high-precision JavaScript/TypeScript library for rounding and formatting numbers. It handles everything from large financial figures and crypto balances to extremely small fractions with scientific subscripts.
+A lightweight, zero-dependency JavaScript/TypeScript library for precise number formatting. Designed for financial applications, crypto dashboards, and scientific data where precision is paramount.
 
-Designed for precision-critical applications where numbers often exceed safe integer limits.
+Unlike standard libraries that rely on floating-point math, **format-number** uses internal string-based arithmetic to handle numbers of any size (including `string`, `number`, and `bigint`) without losing a single decimal point.
 
-For detailed documentation and advanced usage, visit: [here](https://blog.peter-present.xyz/format-number)
+For detailed documentation, visit: [here](https://blog.peter-present.xyz/format-number)
 
 ## Key Features
 
-- **High Precision**: Native support for `string`, `number`, and `bigint` without loss of precision.
-- **Multiple Rounding Modes**: 5 different strategies to handle rounding exactly how you need.
-- **Compact Formatting**: Automatically shorten large numbers with suffixes (K, M, B, T, Q).
-- **Small Number Notation**: Smart formatting for tiny numbers using subscript zeros (e.g., `0.0₃5`).
-- **Flexible Metadata**: Easily add prefixes and suffixes (e.g., Currency symbols, Units).
-- **Fluent API**: Chained operations for cleaner, more readable code.
-- **Zero Dependencies**: Keeps your bundle size minimal.
+- **Zero Precision Loss**: Uses string manipulation for rounding and formatting to avoid binary floating-point errors.
+- **Robust Input Parsing**: Handles messy strings with currency symbols ($€£¥), commas, underscores, and scientific notation automatically.
+- **Advanced Rounding**: 5 strategies (`half`, `up`, `down`, `banker`, `truncate`) with customizable decimal precision.
+- **Intelligent Notation**: Format small numbers with subscript zeros (e.g., `0.0₃5`) or standard scientific notation.
+- **Flexible Compacting**: Shorten massive numbers into readable strings like `1.5T` or `20.4B`.
+- **Fluent Chainable API**: Build complex formatting logic with a clean, readable syntax.
 
 ## Installation
 
@@ -29,88 +28,78 @@ yarn add @peter-present/format-number
 bun install @peter-present/format-number
 ```
 
-## Core Functions
+## Core API
 
-### Rounding: `round()`
+### `formatNumber(value, options)`
 
-Round numbers using specific strategies and precision.
-
-```typescript
-import { round } from 'format-number';
-
-round(123.456, { precision: 2 }); // '123.46'
-round(-123.45, { mode: 'up', precision: 1 }); // '-123.4' (Towards +Infinity)
-```
-
-### Compact Formatting: `compact()`
-
-Format large numbers with readable suffixes.
+The primary entry point for one-off formatting. It combines parsing, rounding, and visualization.
 
 ```typescript
-import { compact } from 'format-number';
+import { formatNumber } from '@peter-present/format-number';
 
-compact(1500); // '1.5K'
-compact(1200000, { precision: 1 }); // '1.2M'
-compact('1000000000000'); // '1T'
+// Currency & Rounding
+formatNumber('$1,234.567', { prefix: '€', precision: 2 }); // '€1234.57'
+
+// Compact Notation
+formatNumber(1500000000, { isCompact: true }); // '1.5B'
+
+// Special Notations
+formatNumber(0.00005, { notation: 'subscript' }); // '0.0₄5'
+formatNumber(12345, { notation: 'scientific' }); // '1.2345e+4'
 ```
 
-### Advanced Formatting: `formatNumber()`
+### `FN(value)` - Fluent API
 
-A comprehensive function combining rounding, compacting, and metadata.
+Best for complex, multi-step formatting requirements where readability is key.
 
 ```typescript
-import { formatNumber } from 'format-number';
+import { FN } from '@peter-present/format-number';
 
-// Currency formatting
-formatNumber(1234.56, { prefix: '$', precision: 1 }); // '$1234.6'
+const formatted = FN('1234567.89')
+  .round({ precision: 0, rounding: 'banker' })
+  .prefix('Balance: ')
+  .suffix(' USD')
+  .toNumber();
 
-// Compact with metadata
-formatNumber(1500000, { isCompact: true, suffix: ' units' }); // '1.5M units'
+console.log(formatted); // 'Balance: 1234568 USD'
 
-// Small number subscript notation
-formatNumber(0.00005, { isSmall: true }); // '0.0₄5'
+// Seamlessly combine with compact and notation
+FN(1500).compact({ precision: 1 }).prefix('$').toNumber(); // '$1.5K'
 ```
 
-### Fluent / Chained API: `FN()`
+### `round(value, options)`
 
-Perform multiple operations in a readable chain.
+Independent rounding utility with high-precision string logic.
 
 ```typescript
-import { FN } from 'format-number';
+import { round } from '@peter-present/format-number';
 
-const result = FN('1234567.89')
-  .round({ precision: 0 })
-  .format({ prefix: 'Total: ', suffix: ' tokens' });
-
-console.log(result); // 'Total: 1234568 tokens'
-
-// Compact chaining
-FN(1000000).compact({ precision: 0 }); // '1M'
+round(1.235, { precision: 2, rounding: 'half' }); // '1.24'
+round(1.235, { precision: 2, rounding: 'down' }); // '1.23'
 ```
 
-## API Reference
+## Configuration Reference
 
-### Rounding Modes (`RoundingMode`)
+### `RoundingMode`
 
-| Mode       | Description                                                          |
-| :--------- | :------------------------------------------------------------------- |
-| `half`     | Round to the nearest neighbor. If equidistant, round away from zero. |
-| `up`       | Round towards Positive Infinity.                                     |
-| `down`     | Round towards Negative Infinity.                                     |
-| `truncate` | Round towards Zero.                                                  |
-| `banker`   | Round to the nearest even neighbor (Statistical rounding).           |
+| Mode       | Description                                                            |
+| :--------- | :--------------------------------------------------------------------- |
+| `half`     | Rounds to the nearest neighbor (rounds away from zero if equidistant). |
+| `up`       | Rounds towards Positive Infinity.                                      |
+| `down`     | Rounds towards Negative Infinity.                                      |
+| `truncate` | Rounds towards Zero (trims decimals).                                  |
+| `banker`   | Rounds to the nearest even neighbor (minimizes statistical bias).      |
 
-### Configuration Options
+### `FormattingConfigType`
 
-| Option         | Type           | Description                                      |
-| :------------- | :------------- | :----------------------------------------------- |
-| `precision`    | `number`       | Number of decimal places (default: `0`).         |
-| `mode`         | `RoundingMode` | Rounding strategy (default: `'half'`).           |
-| `prefix`       | `string`       | Text to prepend to the result.                   |
-| `suffix`       | `string`       | Text to append to the result.                    |
-| `isCompact`    | `boolean`      | If `true`, uses K/M/B/T suffixes.                |
-| `isSmall`      | `boolean`      | If `true`, formats tiny numbers with subscripts. |
-| `isScientific` | `boolean`      | If `true`, formats scientific notation           |
+| Property    | Type                          | Default     | Description                                        |
+| :---------- | :---------------------------- | :---------- | :------------------------------------------------- |
+| `precision` | `number`                      | `0`         | Number of decimal places to maintain.              |
+| `rounding`  | `RoundingMode`                | `'half'`    | Strategy used for rounding.                        |
+| `prefix`    | `string`                      | `""`        | Text prepended to the result.                      |
+| `suffix`    | `string`                      | `""`        | Text appended to the result.                       |
+| `isCompact` | `boolean`                     | `false`     | Whether to use K/M/B/T suffixes for large numbers. |
+| `notation`  | `'subscript' \| 'scientific'` | `undefined` | Special formatting for extreme values.             |
 
 ## License
 
