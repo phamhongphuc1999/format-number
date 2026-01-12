@@ -1,7 +1,7 @@
 {
   "name": "@peter-present/format-number",
-  "version": "0.0.1",
-  "description": "Utility library for number formatting, rounding, and compact display.",
+  "version": "0.0.12",
+  "description": "A lightweight, zero-dependency JavaScript/TypeScript library for precise number formatting. Designed for financial applications, crypto dashboards, and scientific data where precision is paramount.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
