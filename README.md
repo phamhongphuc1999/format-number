@@ -9,11 +9,31 @@ For detailed documentation, visit: [here](https://blog.peter-present.xyz/format-
 ## Key Features
 
 - **Zero Precision Loss**: Uses string manipulation for rounding and formatting to avoid binary floating-point errors.
-- **Robust Input Parsing**: Handles messy strings with currency symbols ($€£¥), commas, underscores, and scientific notation automatically.
+- **Robust Input Parsing**: Centralized parsing handles messy strings with currency symbols ($€£¥), commas, underscores, and scientific notation.
 - **Advanced Rounding**: 5 strategies (`half`, `up`, `down`, `banker`, `truncate`) with customizable decimal precision.
 - **Intelligent Notation**: Format small numbers with subscript zeros (e.g., `0.0₃5`) or standard scientific notation.
 - **Flexible Compacting**: Shorten massive numbers into readable strings like `1.5T` or `20.4B`.
 - **Fluent Chainable API**: Build complex formatting logic with a clean, readable syntax.
+
+## Robust Parsing & Error Handling
+
+The library follows a **Single-Gate Parsing** philosophy. High-level entry points (`FN`, `formatNumber`, and `parseNum`) are designed to be robust and will attempt to clean and normalize nearly any "number-like" string.
+
+> [!IMPORTANT]
+> **Internal functions** (like `round`, `compact`, `scientific`, etc.) are optimized for performance and **assume valid numeric strings**. Passing completely invalid non-numeric data (e.g., `"abc"`) directly to these utilities may result in fallback values or undefined behavior.
+
+For manual parsing with custom error handling, use `parseNum`:
+
+```typescript
+import { parseNum } from '@peter-present/format-number';
+
+// Default fallback is '--'
+parseNum('invalid'); // '--'
+
+// Custom fallback for your own error boundaries
+parseNum('not-a-number', { fallback: 'NaN' }); // 'NaN'
+parseNum('null', { fallback: '0' }); // '0'
+```
 
 ## Installation
 

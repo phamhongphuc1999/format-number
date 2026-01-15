@@ -1,4 +1,4 @@
-import type { NumberType, ObjectNumberType, SignType } from './types';
+import type { NumberType, ObjectNumberType, ParseNumberParamsType, SignType } from './types';
 
 /**
  * Removes redundant leading and trailing zeros from a number string.
@@ -11,17 +11,6 @@ export function clearTrailingZero(value: string) {
   return str.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
 }
 
-export function getInput(value: NumberType): { sign: SignType; value: string } {
-  let str = String(value);
-  str = str.trim();
-  let sign: SignType = '';
-  if (str.startsWith('-')) {
-    str = str.slice(1);
-    sign = '-';
-  }
-  return { sign, value: clearTrailingZero(str) };
-}
-
 const suffixMap: Record<string, number> = { K: 3, M: 6, B: 9, T: 12, Q: 15 };
 
 /**
@@ -30,13 +19,16 @@ const suffixMap: Record<string, number> = { K: 3, M: 6, B: 9, T: 12, Q: 15 };
  * scientific notation (e+), and custom subscript notation (e.g., "5.0₄6").
  *
  * @param value - The input value to parse.
+ * @param options - Optional configuration for parsing (e.g., fallback value).
  * @returns A standardized decimal string.
  *
  * @example
  * parseNum('$1,234.56'); // '1234.56'
+ * parseNum('invalid', { fallback: '0' }); // '0'
  * parseNum('5.0₄6'); // '5.00006'
  */
-export function parseNum(value: NumberType): string {
+export function parseNum(value: NumberType, options: ParseNumberParamsType = {}): string {
+  const { fallback = '--' } = options;
   // Direct number / bigint
   if (typeof value === 'number' || typeof value === 'bigint') {
     return value.toString();
@@ -91,7 +83,7 @@ export function parseNum(value: NumberType): string {
   // 2. Fallback: standard parsing (suffixes K/M/B, scientific e, etc.)
   // ──────────────────────────────────────────────────────────────
   const numMatch = cleaned.match(/[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[KMBTQ]*/i);
-  if (!numMatch) return '0';
+  if (!numMatch) return fallback;
 
   let str = numMatch[0].toUpperCase();
   let power = 0;
@@ -135,6 +127,17 @@ export function parseNum(value: NumberType): string {
   }
 
   return (negative ? '-' : '') + (result || '0');
+}
+
+export function getInput(value: NumberType): { sign: SignType; value: string } {
+  let str = String(value);
+  str = str.trim();
+  let sign: SignType = '';
+  if (str.startsWith('-')) {
+    str = str.slice(1);
+    sign = '-';
+  }
+  return { sign, value: clearTrailingZero(str) };
 }
 
 export function convertToObjectNumber(value: NumberType | ObjectNumberType): ObjectNumberType {

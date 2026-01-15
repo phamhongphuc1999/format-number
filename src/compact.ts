@@ -1,4 +1,4 @@
-import { getInput } from './io';
+import { clearTrailingZero, getInput } from './io';
 import { round } from './round';
 import type { NumberType, RoundingConfigType } from './types';
 
@@ -16,9 +16,11 @@ export function _compact(value: NumberType, options: RoundingConfigType = {}) {
     len -= 3;
     counter++;
   }
-  const rawResult = `${sign}${intPart}${fracPart.length > 0 ? '.' + fracPart : fracPart}`;
+  const rawResult = `${sign}${intPart}${fracPart.length > 0 ? '.' + fracPart : ''}`;
+  const cleanedResult = clearTrailingZero(rawResult);
+
   return {
-    value: options.precision != undefined ? round(rawResult, options) : rawResult,
+    value: options.precision !== undefined ? round(cleanedResult, options) : cleanedResult,
     symbol: counter >= 0 ? configs[counter] : '',
   };
 }

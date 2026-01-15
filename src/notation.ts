@@ -27,18 +27,24 @@ export function _scientific(value: string) {
 
   if (intPart !== '0') {
     const exponent = intPart.length - 1;
-    const mantissa = intPart[0] + '.' + (intPart.slice(1) + fracPart).replace(/0+$/, '');
+    const mantissa = (intPart[0] + '.' + (intPart.slice(1) + fracPart).replace(/0+$/, '')).replace(
+      /\.$/,
+      '',
+    );
 
-    return { value: `${sign}${mantissa}${mantissa.length > 1 ? '' : ''}`, exponent, sign: '+' };
+    return { value: `${sign}${mantissa}`, exponent, sign: '+' };
   }
   const firstNonZero = fracPart.search(/[1-9]/);
   if (firstNonZero === -1) return { value: '0', exponent: 0 };
 
   const exponent = -(firstNonZero + 1);
-  const mantissa =
-    fracPart[firstNonZero] + '.' + fracPart.slice(firstNonZero + 1).replace(/0+$/, '');
+  const mantissa = (
+    fracPart[firstNonZero] +
+    '.' +
+    fracPart.slice(firstNonZero + 1).replace(/0+$/, '')
+  ).replace(/\.$/, '');
 
-  return { value: `${sign}${mantissa}`, exponent: exponent - 1, sign: '' };
+  return { value: `${sign}${mantissa}`, exponent, sign: '' };
 }
 
 /**
@@ -49,5 +55,6 @@ export function _scientific(value: string) {
  */
 export function scientific(value: string) {
   const { value: str, exponent, sign } = _scientific(value);
-  return exponent != 0 ? `${str}e${sign}${exponent}` : str;
+  const finalStr = str.replace(/\.$/, '');
+  return exponent != 0 ? `${finalStr}e${sign}${exponent}` : finalStr;
 }

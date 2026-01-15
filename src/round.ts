@@ -63,8 +63,14 @@ function roundPositiveBanker(value: string, precision = 0): string {
   const [intPart, fracPart = ''] = value.split('.');
   if (precision === 0) {
     if (fracPart) {
-      if (Number(fracPart[0]) >= 5) {
-        if (Number(intPart[0]) / 2 == 0) return intPart;
+      const rest = fracPart.slice(1);
+      if (
+        Number(fracPart[0]) > 5 ||
+        (Number(fracPart[0]) == 5 && rest.replace(/0+$/, '').length > 0)
+      ) {
+        return plusOne(intPart).result;
+      } else if (Number(fracPart[0]) == 5) {
+        if (Number(intPart[intPart.length - 1]) % 2 == 0) return intPart;
         return plusOne(intPart).result;
       } else return intPart;
     }
@@ -73,7 +79,14 @@ function roundPositiveBanker(value: string, precision = 0): string {
   if (precision >= fracPart.length) return intPart + (fracPart ? `.${fracPart}` : '');
   const fracPartRound = fracPart.slice(0, precision);
   const fracPartRest = fracPart.slice(precision);
-  if (fracPartRest[0] == '5') {
+  if (
+    Number(fracPartRest[0]) > 5 ||
+    (fracPartRest[0] == '5' && fracPartRest.slice(1).replace(/0+$/, '').length > 0)
+  ) {
+    const _fracPartRound = plusOne(fracPartRound);
+    if (!_fracPartRound.remaining) return intPart + '.' + _fracPartRound.result;
+    return plusOne(intPart).result;
+  } else if (fracPartRest[0] == '5') {
     if (Number(fracPartRound[fracPartRound.length - 1]) % 2 == 0)
       return intPart + '.' + fracPartRound;
     else {
@@ -81,10 +94,6 @@ function roundPositiveBanker(value: string, precision = 0): string {
       if (!_fracPartRound.remaining) return intPart + '.' + _fracPartRound.result;
       return plusOne(intPart).result;
     }
-  } else if (Number(fracPartRest[0]) > 5) {
-    const _fracPartRound = plusOne(fracPartRound);
-    if (!_fracPartRound.remaining) return intPart + '.' + _fracPartRound.result;
-    return plusOne(intPart).result;
   } else return intPart + '.' + fracPartRound;
 }
 

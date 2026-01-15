@@ -82,7 +82,7 @@ export function FN(value: NumberType | ObjectNumberType) {
  * @example
  * formatNumber(1500000, { isCompact: true, notation: 'scientific' }); // '1.5M' (compacted before potential notation)
  */
-export function formatNumber(value: NumberType, options?: FormattingConfigType) {
+export function formatNumber(value: NumberType, options: FormattingConfigType = {}) {
   let result = FN(value).round(options);
   if (options.isCompact) result = result.compact(options);
   if (options.notation) result = result.notation(options.notation);

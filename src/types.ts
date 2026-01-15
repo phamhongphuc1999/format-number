@@ -94,3 +94,9 @@ export type FNType = {
    */
   toObject(): ObjectNumberType;
 };
+
+/** Configuration for input parsing */
+export type ParseNumberParamsType = Partial<{
+  /** Value to return if parsing fails. Default is '--' */
+  fallback: string;
+}>;
