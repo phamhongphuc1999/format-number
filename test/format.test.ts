@@ -25,7 +25,8 @@ describe('Formatting Entry Points', () => {
 
     it('should expose internal state via toObject', () => {
       const obj = FN(1500).prefix('~').compact().toObject();
-      assert.equal(obj.value, '1.5');
+      assert.equal(obj.intPart, '1');
+      assert.equal(obj.fracPart, '5');
       assert.equal(obj.compactedSymbol, 'K');
       assert.equal(obj.prefix, '~');
       assert.equal(obj.sign, '');
@@ -44,8 +45,6 @@ describe('Formatting Entry Points', () => {
         formatNumber(1500000, { isCompact: true, notation: 'scientific', precision: 1 }),
         '1.5M',
       );
-      // Note: Me+6 looks weird, but that's how the logic currently handles notation + compact symbol.
-      // Usually you'd use one or the other.
     });
 
     it('should handle empty options', () => {

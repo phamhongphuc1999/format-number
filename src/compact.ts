@@ -1,12 +1,15 @@
-import { clearTrailingZero, getInput } from './io';
-import { round } from './round';
-import type { NumberType, RoundingConfigType } from './types';
+import { clearLeadingZero, clearTrailingZero, getBaseNumberNumber, getStandardOutput } from './io';
+import { _round } from './round';
+import type { BaseObjectNumberType, NumberType, RoundingConfigType } from './types';
 
 const configs = ['K', 'M', 'B', 'T', 'Q'];
 
-export function _compact(value: NumberType, options: RoundingConfigType = {}) {
-  const { sign, value: str } = getInput(value);
-  let [intPart, fracPart = ''] = str.split('.');
+export function _compact(
+  value: BaseObjectNumberType,
+  options: RoundingConfigType = {},
+): BaseObjectNumberType & { symbol: string } {
+  // eslint-disable-next-line prefer-const
+  let { sign, intPart, fracPart } = value;
   let len = intPart.length;
   let counter = -1;
   while (len > 3 && counter < 4) {
@@ -16,11 +19,14 @@ export function _compact(value: NumberType, options: RoundingConfigType = {}) {
     len -= 3;
     counter++;
   }
-  const rawResult = `${sign}${intPart}${fracPart.length > 0 ? '.' + fracPart : ''}`;
-  const cleanedResult = clearTrailingZero(rawResult);
-
+  const _result =
+    options.precision != undefined
+      ? _round({ sign, intPart, fracPart }, options)
+      : { sign, intPart, fracPart };
   return {
-    value: options.precision !== undefined ? round(cleanedResult, options) : cleanedResult,
+    sign,
+    intPart: clearLeadingZero(_result.intPart),
+    fracPart: clearTrailingZero(_result.fracPart),
     symbol: counter >= 0 ? configs[counter] : '',
   };
 }
@@ -40,6 +46,6 @@ export function _compact(value: NumberType, options: RoundingConfigType = {}) {
  * compact('1000000000000'); // '1T'
  */
 export function compact(value: NumberType, options: RoundingConfigType = {}) {
-  const { value: str, symbol } = _compact(value, options);
-  return str + symbol;
+  const { sign, intPart, fracPart, symbol } = _compact(getBaseNumberNumber(value), options);
+  return getStandardOutput({ sign, intPart, fracPart }) + symbol;
 }

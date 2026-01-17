@@ -1,7 +1,7 @@
 import { _compact } from './compact';
 import { convertToObjectNumber } from './io';
 import { scientific, subscript } from './notation';
-import { round } from './round';
+import { _round } from './round';
 import type {
   FNType,
   FormattingConfigType,
@@ -14,13 +14,18 @@ import type {
 function _FN(value: ObjectNumberType): FNType {
   return {
     round: (options?: RoundingConfigType) => {
-      const roundedValue = round(value.value, options);
-      return _FN({ ...value, value: roundedValue });
+      const roundedValue = _round(value, options);
+      return _FN({ ...value, ...roundedValue });
     },
     compact: (options?: RoundingConfigType) => {
       if (value.compactedSymbol) return _FN(value);
-      const { value: compactedValue, symbol: compactedSymbol } = _compact(value.value, options);
-      return _FN({ ...value, compactedSymbol, value: compactedValue });
+      const compactedValue = _compact(value, options);
+      return _FN({
+        ...value,
+        intPart: compactedValue.intPart,
+        fracPart: compactedValue.fracPart,
+        compactedSymbol: compactedValue.symbol,
+      });
     },
     notation(mode: NotationMode = 'scientific') {
       return _FN({ ...value, notation: mode });
@@ -32,10 +37,15 @@ function _FN(value: ObjectNumberType): FNType {
       return _FN({ ...value, suffix: symbol });
     },
     toNumber() {
-      let { value: result } = value;
-      const { sign, prefix, suffix, compactedSymbol } = value;
-      if (value.notation == 'scientific') result = scientific(result);
-      else if (value.notation == 'subscript') result = subscript(result);
+      const { sign, intPart, fracPart, prefix, suffix, compactedSymbol, notation } = value;
+      let result = fracPart.length > 0 ? `${intPart}.${fracPart}` : intPart;
+
+      if (notation === 'scientific') {
+        result = scientific({ sign: '', intPart, fracPart });
+      } else if (notation === 'subscript') {
+        result = subscript({ sign: '', intPart, fracPart });
+      }
+
       return `${prefix || ''}${sign}${result}${compactedSymbol || ''}${suffix || ''}`;
     },
     toObject() {
@@ -91,6 +101,18 @@ export function formatNumber(value: NumberType, options: FormattingConfigType = 
   return result.toNumber();
 }
 
+/**
+ * Creates a reusable formatting function with predefined options.
+ * Useful for applying consistent formatting across multiple numbers.
+ *
+ * @param options - Configuration options for the formatter.
+ * @returns A function that accepts a value and returns the formatted string.
+ *
+ * @example
+ * const formatCurrency = createFormatFunction({ prefix: '$', precision: 2 });
+ * formatCurrency(1234.56); // '$1234.56'
+ * formatCurrency(100); // '$100.00'
+ */
 export function createFormatFunction(options: FormattingConfigType = {}) {
   return (value: NumberType) => formatNumber(value, options);
 }

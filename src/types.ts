@@ -28,8 +28,13 @@ export type NumberConfigType = Partial<{
   notation: NotationMode;
 }>;
 
+export type BasePositiveNumberType = { intPart: string; fracPart: string };
+
+export type BaseObjectNumberType = { sign: SignType } & BasePositiveNumberType;
+
 /** Internal object structure containing full formatting state */
-export type ObjectNumberType = { sign: SignType; value: string } & NumberConfigType &
+export type ObjectNumberType = BaseObjectNumberType &
+  NumberConfigType &
   Partial<{
     /** The symbol used for compact notation (e.g., 'K', 'M') */
     compactedSymbol: string;
@@ -100,3 +105,5 @@ export type ParseNumberParamsType = Partial<{
   /** Value to return if parsing fails. Default is '--' */
   fallback: string;
 }>;
+
+export type ScientificReturnType = { value: string; exponent: number; sign?: string };

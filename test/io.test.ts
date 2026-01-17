@@ -1,30 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert, describe, it } from 'vitest';
-import { clearTrailingZero, parseNum } from '../src';
+import { clearUnnecessaryZero, parseNum } from '../src';
 import { convertToObjectNumber } from '../src/io';
 
 describe('IO Utility Tests', () => {
-  describe('clearTrailingZero', () => {
+  describe('clearUnnecessaryZero', () => {
     it('should remove leading zeros correctly', () => {
-      assert.equal(clearTrailingZero('00123'), '123');
-      assert.equal(clearTrailingZero('000.123'), '0.123');
-      assert.equal(clearTrailingZero('-00123'), '-123');
+      assert.equal(clearUnnecessaryZero('00123'), '123');
+      assert.equal(clearUnnecessaryZero('000.123'), '0.123');
+      assert.equal(clearUnnecessaryZero('-00123'), '-123');
     });
 
     it('should remove trailing zeros in decimal part', () => {
-      assert.equal(clearTrailingZero('123.4500'), '123.45');
-      assert.equal(clearTrailingZero('123.000'), '123');
-      assert.equal(clearTrailingZero('-123.4500'), '-123.45');
+      assert.equal(clearUnnecessaryZero('123.4500'), '123.45');
+      assert.equal(clearUnnecessaryZero('123.000'), '123');
+      assert.equal(clearUnnecessaryZero('-123.4500'), '-123.45');
     });
 
     it('should handle zero values correctly', () => {
-      assert.equal(clearTrailingZero('0.000'), '0');
-      assert.equal(clearTrailingZero('000'), '0');
+      assert.equal(clearUnnecessaryZero('0.000'), '0');
+      assert.equal(clearUnnecessaryZero('000'), '0');
     });
 
     it('should not remove zeros in the middle', () => {
-      assert.equal(clearTrailingZero('100.001'), '100.001');
-      assert.equal(clearTrailingZero('102030'), '102030');
+      assert.equal(clearUnnecessaryZero('100.001'), '100.001');
+      assert.equal(clearUnnecessaryZero('102030'), '102030');
     });
   });
 
@@ -93,14 +93,22 @@ describe('IO Utility Tests', () => {
 
   describe('convertToObjectNumber', () => {
     it('should convert primitive types correctly', () => {
-      assert.deepEqual(convertToObjectNumber(123), { sign: '', value: '123' });
-      assert.deepEqual(convertToObjectNumber(-123.45), { sign: '-', value: '123.45' });
-      assert.deepEqual(convertToObjectNumber('00123.4500'), { sign: '', value: '123.45' });
-      assert.deepEqual(convertToObjectNumber(100n), { sign: '', value: '100' });
+      assert.deepEqual(convertToObjectNumber(123), { sign: '', intPart: '123', fracPart: '' });
+      assert.deepEqual(convertToObjectNumber(-123.45), {
+        sign: '-',
+        intPart: '123',
+        fracPart: '45',
+      });
+      assert.deepEqual(convertToObjectNumber('00123.4500'), {
+        sign: '',
+        intPart: '123',
+        fracPart: '45',
+      });
+      assert.deepEqual(convertToObjectNumber(100n), { sign: '', intPart: '100', fracPart: '' });
     });
 
     it('should return ObjectNumberType as-is', () => {
-      const obj = { sign: '-' as const, value: '123', prefix: '$' };
+      const obj = { sign: '-' as const, intPart: '123', fracPart: '3', prefix: '$' };
       assert.strictEqual(convertToObjectNumber(obj as any), obj);
     });
   });

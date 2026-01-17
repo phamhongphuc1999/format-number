@@ -1,29 +1,29 @@
-import { getInput } from './io';
+import { getBaseNumberNumber } from './io';
+import type { BaseObjectNumberType, NumberType, ScientificReturnType } from './types';
 
-/**
- * Formats the decimal part of small numbers using subscript characters
- * to represent the number of consecutive leading zeros.
- *
- * @param value - The number string to format.
- * @returns A string with subscript notation (e.g., '0.0₃5').
- */
-export function subscript(value: string) {
-  const { sign, value: str } = getInput(value);
-  const [intPart, fracPart = ''] = str.split('.');
-  const leadingZeros = fracPart.match(/^0+/)?.[0]?.length || 0;
-  const subscript = leadingZeros
-    .toString()
-    .split('')
-    .map((digit) => String.fromCharCode(0x2080 + parseInt(digit)))
-    .join('');
-  const trimmedDecimal = fracPart.slice(leadingZeros);
-  return `${sign}${intPart}.0${subscript}${trimmedDecimal}`;
+// Helper to ensure we have an object
+function toObj(value: NumberType | BaseObjectNumberType): BaseObjectNumberType {
+  return typeof value === 'object' && 'intPart' in value ? value : getBaseNumberNumber(value);
 }
 
-export function _scientific(value: string) {
-  const { sign, value: str } = getInput(value);
-  if (str == '0') return { value: '0', exponent: 0 };
-  const [intPart, fracPart = ''] = str.split('.');
+/**
+ * Formats the decimal part of small numbers using subscript characters.
+ */
+export function subscript(value: NumberType | BaseObjectNumberType) {
+  const { sign, intPart, fracPart } = toObj(value);
+  const leadingZeros = fracPart.match(/^0+/)?.[0]?.length || 0;
+
+  const sub = leadingZeros
+    .toString()
+    .split('')
+    .reduce((acc, d) => acc + String.fromCharCode(0x2080 + Number(d)), '');
+  return `${sign}${intPart}.0${sub}${fracPart.slice(leadingZeros)}`;
+}
+
+export function _scientific(value: BaseObjectNumberType): ScientificReturnType {
+  const { sign, intPart, fracPart } = value;
+  // Normalize logical sign for mantissa
+  const logicalSign = sign === '-' ? '-' : '';
 
   if (intPart !== '0') {
     const exponent = intPart.length - 1;
@@ -31,9 +31,9 @@ export function _scientific(value: string) {
       /\.$/,
       '',
     );
-
-    return { value: `${sign}${mantissa}`, exponent, sign: '+' };
+    return { value: `${logicalSign}${mantissa}`, exponent, sign: '+' };
   }
+
   const firstNonZero = fracPart.search(/[1-9]/);
   if (firstNonZero === -1) return { value: '0', exponent: 0 };
 
@@ -44,17 +44,13 @@ export function _scientific(value: string) {
     fracPart.slice(firstNonZero + 1).replace(/0+$/, '')
   ).replace(/\.$/, '');
 
-  return { value: `${sign}${mantissa}`, exponent, sign: '' };
+  return { value: `${logicalSign}${mantissa}`, exponent, sign: '' };
 }
 
 /**
  * Formats a number string using standard scientific notation.
- *
- * @param value - The number string to format.
- * @returns A string in scientific notation (e.g., '1.23e+5').
  */
-export function scientific(value: string) {
-  const { value: str, exponent, sign } = _scientific(value);
-  const finalStr = str.replace(/\.$/, '');
-  return exponent != 0 ? `${finalStr}e${sign}${exponent}` : finalStr;
+export function scientific(value: NumberType | BaseObjectNumberType) {
+  const { value: str, exponent, sign } = _scientific(toObj(value));
+  return exponent !== 0 ? `${str}e${sign}${exponent}` : str;
 }
