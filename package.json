@@ -6,11 +6,19 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": false,
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "bun run clear && tsc && vite build",
+    "build": "bun run clear && vite build",
     "preview": "vite preview",
     "clear": "rm -rf dist",
     "test": "vitest run",

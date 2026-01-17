@@ -87,6 +87,7 @@ describe('IO Utility Tests', () => {
       assert.equal(parseNum('@1,,1#234.564**4'), '11');
       assert.equal(parseNum('.5'), '0.5');
       assert.equal(parseNum('1.'), '1');
+      assert.equal(parseNum('null'), '--');
     });
   });
 

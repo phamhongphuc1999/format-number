@@ -90,3 +90,7 @@ export function formatNumber(value: NumberType, options: FormattingConfigType = 
   if (options.suffix) result = result.suffix(options.suffix);
   return result.toNumber();
 }
+
+export function createFormatFunction(options: FormattingConfigType = {}) {
+  return (value: NumberType) => formatNumber(value, options);
+}
