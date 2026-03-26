@@ -1,5 +1,5 @@
 import { assert, describe, it } from 'vitest';
-import { FN, formatNumber } from '../src';
+import { FN, createFormatFunction, formatNumber } from '../src';
 
 describe('Formatting Entry Points', () => {
   describe('FN (Fluent API)', () => {
@@ -36,6 +36,18 @@ describe('Formatting Entry Points', () => {
       const result = FN(0.00001).notation('subscript').toNumber();
       assert.equal(result, '0.0₄1');
     });
+
+    it('should allow notation none in chain', () => {
+      const result = FN(12345).notation('none').toNumber();
+      assert.equal(result, '12345');
+    });
+
+    it('should allow custom compact symbols in chain', () => {
+      const result = FN(1000)
+        .compact({ compactSymbols: ['k'] })
+        .toNumber();
+      assert.equal(result, '1k');
+    });
   });
 
   describe('formatNumber (One-off API)', () => {
@@ -57,6 +69,14 @@ describe('Formatting Entry Points', () => {
 
     it('should allow notation none', () => {
       assert.equal(formatNumber(12345, { notation: 'none' }), '12345');
+    });
+  });
+
+  describe('createFormatFunction', () => {
+    it('should return a reusable formatter', () => {
+      const fmt = createFormatFunction({ prefix: '$', precision: 2, fixed: true });
+      assert.equal(fmt(1.2), '$1.20');
+      assert.equal(fmt(100), '$100.00');
     });
   });
 });

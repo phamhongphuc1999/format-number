@@ -48,6 +48,10 @@ describe('Compacting Tests', () => {
     assert.equal(compact(999950000, { precision: 1, fixed: true }), '1.0B');
   });
 
+  it('should respect fixed precision with zero decimals', () => {
+    assert.equal(compact(1500, { precision: 0, fixed: true }), '2K');
+  });
+
   it('should allow custom compact symbols', () => {
     assert.equal(compact(1000, { compactSymbols: ['k', 'm'] }), '1k');
   });

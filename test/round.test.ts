@@ -106,6 +106,11 @@ describe('Rounding Tests', () => {
       assert.equal(round(1e21, { precision: 0 }), '1000000000000000000000');
     });
 
+    it('should clamp negative precision to zero', () => {
+      assert.equal(round(1.9, { precision: -2 }), '2');
+      assert.equal(round(1.1, { precision: -2 }), '1');
+    });
+
     it('should handle zero precision', () => {
       assert.equal(round(1.9, { precision: 0 }), '2');
     });

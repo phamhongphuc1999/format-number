@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert, describe, it } from 'vitest';
-import { clearUnnecessaryZero, parseNum, parseNumber } from '../src';
+import {
+  clearLeadingZero,
+  clearTrailingZero,
+  clearUnnecessaryZero,
+  parseNum,
+  parseNumber,
+} from '../src';
 import { convertToObjectNumber } from '../src/io';
 
 describe('IO Utility Tests', () => {
@@ -25,6 +31,20 @@ describe('IO Utility Tests', () => {
     it('should not remove zeros in the middle', () => {
       assert.equal(clearUnnecessaryZero('100.001'), '100.001');
       assert.equal(clearUnnecessaryZero('102030'), '102030');
+    });
+  });
+
+  describe('clearLeadingZero', () => {
+    it('should remove leading zeros correctly', () => {
+      assert.equal(clearLeadingZero('000123'), '123');
+      assert.equal(clearLeadingZero('0'), '0');
+    });
+  });
+
+  describe('clearTrailingZero', () => {
+    it('should remove trailing zeros correctly', () => {
+      assert.equal(clearTrailingZero('12000'), '12');
+      assert.equal(clearTrailingZero('0'), '');
     });
   });
 
@@ -53,6 +73,13 @@ describe('IO Utility Tests', () => {
     it('should support locale separators when provided', () => {
       assert.equal(
         parseNum('1.234.567,89', { locale: { groupSeparator: '.', decimalSeparator: ',' } }),
+        '1234567.89',
+      );
+    });
+
+    it('should allow locale when decimal separator is dot', () => {
+      assert.equal(
+        parseNum('1,234,567.89', { locale: { groupSeparator: ',', decimalSeparator: '.' } }),
         '1234567.89',
       );
     });

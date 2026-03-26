@@ -40,10 +40,16 @@ export function _compact(
     nextCounter++;
   }
 
+  let finalFrac = options.fixed ? nextFrac : clearTrailingZero(nextFrac);
+  if (options.fixed && options.precision != undefined) {
+    const precision = Math.max(0, options.precision);
+    finalFrac = finalFrac.slice(0, precision).padEnd(precision, '0');
+  }
+
   return {
     sign,
     intPart: clearLeadingZero(nextInt),
-    fracPart: options.fixed ? nextFrac : clearTrailingZero(nextFrac),
+    fracPart: finalFrac,
     symbol: nextCounter >= 0 ? symbols[nextCounter] : '',
   };
 }
