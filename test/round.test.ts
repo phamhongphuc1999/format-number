@@ -92,6 +92,20 @@ describe('Rounding Tests', () => {
       assert.equal(round(1.2, { precision: 5 }), '1.2');
     });
 
+    it('should pad trailing zeros when fixed is true', () => {
+      assert.equal(round(1.2, { precision: 5, fixed: true }), '1.20000');
+    });
+
+    it('should normalize negative zero', () => {
+      assert.equal(round(-0.1, { precision: 0 }), '0');
+      assert.equal(round(-0.004, { precision: 2, fixed: true }), '0.00');
+    });
+
+    it('should handle exponential numeric inputs', () => {
+      assert.equal(round(1e-7, { precision: 8, fixed: true }), '0.00000010');
+      assert.equal(round(1e21, { precision: 0 }), '1000000000000000000000');
+    });
+
     it('should handle zero precision', () => {
       assert.equal(round(1.9, { precision: 0 }), '2');
     });

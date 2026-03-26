@@ -8,26 +8,43 @@ export function _compact(
   value: BaseObjectNumberType,
   options: RoundingConfigType = {},
 ): BaseObjectNumberType & { symbol: string } {
-  // eslint-disable-next-line prefer-const
-  let { sign, intPart, fracPart } = value;
-  let len = intPart.length;
+  const sign = value.sign;
+  let { intPart, fracPart } = value;
+  const symbols =
+    options.compactSymbols && options.compactSymbols.length > 0 ? options.compactSymbols : configs;
+  const maxCounter = symbols.length - 1;
   let counter = -1;
-  while (len > 3 && counter < 4) {
-    const _intPart = intPart.slice(0, len - 3);
-    fracPart = intPart.slice(len - 3) + fracPart;
-    intPart = _intPart;
-    len -= 3;
-    counter++;
+
+  if (intPart.length > 3 && maxCounter >= 0) {
+    const groupsMoved = Math.min(Math.floor((intPart.length - 1) / 3), maxCounter + 1);
+    const shift = groupsMoved * 3;
+    const cut = intPart.length - shift;
+    fracPart = intPart.slice(cut) + fracPart;
+    intPart = intPart.slice(0, cut);
+    counter = groupsMoved - 1;
   }
+
   const _result =
     options.precision != undefined
       ? _round({ sign, intPart, fracPart }, options)
       : { sign, intPart, fracPart };
+
+  let nextInt = _result.intPart;
+  let nextFrac = _result.fracPart;
+  let nextCounter = counter;
+
+  while (nextInt.length > 3 && nextCounter < maxCounter) {
+    const cut = nextInt.length - 3;
+    nextFrac = nextInt.slice(cut) + nextFrac;
+    nextInt = nextInt.slice(0, cut);
+    nextCounter++;
+  }
+
   return {
     sign,
-    intPart: clearLeadingZero(_result.intPart),
-    fracPart: clearTrailingZero(_result.fracPart),
-    symbol: counter >= 0 ? configs[counter] : '',
+    intPart: clearLeadingZero(nextInt),
+    fracPart: options.fixed ? nextFrac : clearTrailingZero(nextFrac),
+    symbol: nextCounter >= 0 ? symbols[nextCounter] : '',
   };
 }
 

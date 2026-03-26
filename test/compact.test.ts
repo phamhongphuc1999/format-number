@@ -43,6 +43,15 @@ describe('Compacting Tests', () => {
     assert.equal(compact(1235567, { precision: 2, rounding: 'down' }), '1.23M');
   });
 
+  it('should promote suffix when rounding overflows', () => {
+    assert.equal(compact(999500, { precision: 0 }), '1M');
+    assert.equal(compact(999950000, { precision: 1, fixed: true }), '1.0B');
+  });
+
+  it('should allow custom compact symbols', () => {
+    assert.equal(compact(1000, { compactSymbols: ['k', 'm'] }), '1k');
+  });
+
   it('should handle string and bigint inputs', () => {
     assert.equal(compact('1500.5'), '1.5005K');
     assert.equal(compact(1000000n), '1M');

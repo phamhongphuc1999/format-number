@@ -5,7 +5,7 @@ export type NumberType = number | string | bigint;
 export type RoundingMode = 'half' | 'up' | 'down' | 'banker' | 'truncate';
 
 /** Modes for special numerical notation */
-export type NotationMode = 'subscript' | 'scientific';
+export type NotationMode = 'subscript' | 'scientific' | 'none';
 
 /** Possible sign values for internal number representation */
 export type SignType = '-' | '';
@@ -16,6 +16,10 @@ export type RoundingConfigType = Partial<{
   rounding: RoundingMode;
   /** Number of decimal places to keep */
   precision: number;
+  /** Whether to pad trailing zeros to match precision */
+  fixed: boolean;
+  /** Override compact symbols (e.g., ['K', 'M', 'B']) */
+  compactSymbols: string[];
 }>;
 
 /** Configuration for basic number display properties */
@@ -46,6 +50,8 @@ export type FormattingConfigType = RoundingConfigType &
   Partial<{
     /** Whether to use compact notation (K, M, B, etc.) */
     isCompact: boolean;
+    /** Override compact symbols (e.g., ['K', 'M', 'B']) */
+    compactSymbols: string[];
   }>;
 
 /**
@@ -104,6 +110,11 @@ export type FNType = {
 export type ParseNumberParamsType = Partial<{
   /** Value to return if parsing fails. Default is '--' */
   fallback: string;
+  /**
+   * Locale separators to interpret (e.g., { groupSeparator: '.', decimalSeparator: ',' }).
+   * When provided, group separators are removed and decimal separators are normalized to '.'.
+   */
+  locale: Partial<{ groupSeparator: string; decimalSeparator: string }>;
 }>;
 
 export type ScientificReturnType = { value: string; exponent: number; sign?: string };

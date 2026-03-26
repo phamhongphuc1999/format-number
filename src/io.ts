@@ -30,7 +30,7 @@ export function clearUnnecessaryZero(value: string) {
  * Parses various input formats into a standard decimal string.
  */
 export function parseNum(value: NumberType, options: ParseNumberParamsType = {}): string {
-  const { fallback = '--' } = options;
+  const { fallback = '--', locale } = options;
   if (typeof value === 'number' || typeof value === 'bigint') return value.toString();
 
   const input = String(value ?? '').trim();
@@ -40,8 +40,23 @@ export function parseNum(value: NumberType, options: ParseNumberParamsType = {})
   const signMatch = input.match(/^[\s+-]*/);
   const negative = ((signMatch && signMatch[0].match(/-/g)) || []).length % 2 === 1;
 
-  // Remove currency, commas, underscores, spaces
-  const cleaned = input.replace(/[$€£¥,_\s]/g, '');
+  // Remove currency, underscores, spaces
+  let cleaned = input.replace(/[$€£¥_\s]/g, '');
+  if (locale) {
+    const groupSeparator = locale.groupSeparator;
+    const decimalSeparator = locale.decimalSeparator;
+    if (groupSeparator) {
+      const escaped = groupSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      cleaned = cleaned.replace(new RegExp(escaped, 'g'), '');
+    }
+    if (decimalSeparator && decimalSeparator !== '.') {
+      const escaped = decimalSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      cleaned = cleaned.replace(new RegExp(escaped, 'g'), '.');
+    }
+  } else {
+    // Default: remove commas for common group separators
+    cleaned = cleaned.replace(/,/g, '');
+  }
 
   // 1. Small decimal format (e.g., "5.0₄6")
   const smallMatch = cleaned.match(/^([+-]?\d+)\.0([\u2080-\u2089]+)([0-9]*)$/i);
@@ -99,16 +114,26 @@ export function parseNum(value: NumberType, options: ParseNumberParamsType = {})
 
 export function getBaseNumberNumber(value: NumberType): BaseObjectNumberType {
   let str = String(value).trim();
+  if (/[eE]/.test(str)) {
+    str = parseNum(str);
+  }
   const sign = str.startsWith('-') ? '-' : '';
   if (sign) str = str.slice(1);
   const [intPart, fracPart = ''] = clearUnnecessaryZero(str).split('.');
   return { sign: sign as SignType, intPart, fracPart };
 }
 
-export const getStandardOutput = (value: BaseObjectNumberType): string =>
-  value.fracPart
+export const getStandardOutput = (value: BaseObjectNumberType): string => {
+  const isZero = value.intPart === '0' && (!value.fracPart || /^0+$/.test(value.fracPart));
+  if (isZero) {
+    return value.fracPart ? `0.${value.fracPart}` : '0';
+  }
+  return value.fracPart
     ? `${value.sign}${value.intPart}.${value.fracPart}`
     : `${value.sign}${value.intPart}`;
+};
+
+export const parseNumber = parseNum;
 
 export function convertToObjectNumber(value: NumberType | ObjectNumberType): ObjectNumberType {
   return typeof value === 'object' && value !== null && 'intPart' in value

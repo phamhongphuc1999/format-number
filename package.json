@@ -1,6 +1,6 @@
 {
   "name": "@peter-present/format-number",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "description": "A lightweight, zero-dependency JavaScript/TypeScript library for precise number formatting. Designed for financial applications, crypto dashboards, and scientific data where precision is paramount.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -22,6 +22,7 @@
     "preview": "vite preview",
     "clear": "rm -rf dist",
     "test": "vitest run",
+    "bench": "bun run scripts/bench.ts",
     "prepare": "bun run build",
     "eslint": "eslint --config ./eslint.config.js --cache",
     "format": "prettier --write .",

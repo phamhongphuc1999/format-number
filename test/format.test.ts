@@ -50,5 +50,13 @@ describe('Formatting Entry Points', () => {
     it('should handle empty options', () => {
       assert.equal(formatNumber(123.45), '123');
     });
+
+    it('should support fixed precision padding', () => {
+      assert.equal(formatNumber(12.3, { precision: 3, fixed: true }), '12.300');
+    });
+
+    it('should allow notation none', () => {
+      assert.equal(formatNumber(12345, { notation: 'none' }), '12345');
+    });
   });
 });

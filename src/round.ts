@@ -64,13 +64,11 @@ function roundPosBanker(value: BasePositiveNumberType, precision = 0): BasePosit
     const prevDigit = precision === 0 ? intPart[intPart.length - 1] : fracPart[precision - 1];
     if (parseInt(prevDigit, 10) % 2 !== 0) shouldUp = true;
   }
-
   if (shouldUp) {
     if (precision === 0) return incInt(value);
     const { result, carry } = increment(fracPart.slice(0, precision));
     return carry ? incInt(value) : { intPart, fracPart: result };
   }
-
   return { intPart, fracPart: fracPart.slice(0, precision) };
 }
 
@@ -79,7 +77,8 @@ export function _round(
   options: RoundingConfigType = {},
 ): BaseObjectNumberType {
   const mode = options.rounding || 'half';
-  const precision = options.precision || 0;
+  const precision = Math.max(0, options.precision ?? 0);
+  const fixed = options.fixed === true;
   const { sign, intPart, fracPart } = value;
   const posVal = { intPart, fracPart };
 
@@ -105,7 +104,10 @@ export function _round(
       res = roundPosHalf(posVal, precision);
   }
 
-  return { sign, ...res };
+  let nextFrac = res.fracPart;
+  if (fixed && precision > 0) nextFrac = nextFrac.padEnd(precision, '0');
+  if (fixed && precision === 0) nextFrac = '';
+  return { sign, intPart: res.intPart, fracPart: nextFrac };
 }
 
 export function round(value: NumberType, options: RoundingConfigType = {}): string {

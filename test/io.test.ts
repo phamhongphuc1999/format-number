@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert, describe, it } from 'vitest';
-import { clearUnnecessaryZero, parseNum } from '../src';
+import { clearUnnecessaryZero, parseNum, parseNumber } from '../src';
 import { convertToObjectNumber } from '../src/io';
 
 describe('IO Utility Tests', () => {
@@ -50,6 +50,13 @@ describe('IO Utility Tests', () => {
       assert.equal(parseNum('¥12,345'), '12345');
     });
 
+    it('should support locale separators when provided', () => {
+      assert.equal(
+        parseNum('1.234.567,89', { locale: { groupSeparator: '.', decimalSeparator: ',' } }),
+        '1234567.89',
+      );
+    });
+
     it('should handle large number suffixes', () => {
       assert.equal(parseNum('1.5K'), '1500');
       assert.equal(parseNum('1.5M'), '1500000');
@@ -88,6 +95,10 @@ describe('IO Utility Tests', () => {
       assert.equal(parseNum('.5'), '0.5');
       assert.equal(parseNum('1.'), '1');
       assert.equal(parseNum('null'), '--');
+    });
+
+    it('should expose parseNumber alias', () => {
+      assert.equal(parseNumber('1.2K'), '1200');
     });
   });
 

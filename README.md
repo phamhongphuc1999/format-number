@@ -9,7 +9,7 @@ For detailed documentation, visit: [here](https://blog.peter-present.xyz/format-
 ## Key Features
 
 - **Zero Precision Loss**: Uses string manipulation for rounding and formatting to avoid binary floating-point errors.
-- **Robust Input Parsing**: Centralized parsing handles messy strings with currency symbols ($€£¥), commas, underscores, and scientific notation.
+- **Robust Input Parsing**: Centralized parsing handles messy strings with currency symbols ($€£¥), commas, underscores, scientific notation, and optional locale separators.
 - **Advanced Rounding**: 5 strategies (`half`, `up`, `down`, `banker`, `truncate`) with customizable decimal precision.
 - **Intelligent Notation**: Format small numbers with subscript zeros (e.g., `0.0₃5`) or standard scientific notation.
 - **Flexible Compacting**: Shorten massive numbers into readable strings like `1.5T` or `20.4B`.
@@ -22,7 +22,7 @@ The library follows a **Single-Gate Parsing** philosophy. High-level entry point
 > [!IMPORTANT]
 > **Internal functions** (like `round`, `compact`, `scientific`, etc.) are optimized for performance and **assume valid numeric strings**. Passing completely invalid non-numeric data (e.g., `"abc"`) directly to these utilities may result in fallback values or undefined behavior.
 
-For manual parsing with custom error handling, use `parseNum`:
+For manual parsing with custom error handling, use `parseNum` (alias: `parseNumber`):
 
 ```typescript
 import { parseNum } from '@peter-present/format-number';
@@ -33,6 +33,11 @@ parseNum('invalid'); // '--'
 // Custom fallback for your own error boundaries
 parseNum('not-a-number', { fallback: 'NaN' }); // 'NaN'
 parseNum('null', { fallback: '0' }); // '0'
+
+// Locale-aware parsing
+parseNum('1.234.567,89', {
+  locale: { groupSeparator: '.', decimalSeparator: ',' },
+}); // '1234567.89'
 ```
 
 ## Installation
@@ -59,6 +64,7 @@ import { formatNumber } from '@peter-present/format-number';
 
 // Currency & Rounding
 formatNumber('$1,234.567', { prefix: '€', precision: 2 }); // '€1234.57'
+formatNumber('$1,234.5', { precision: 2, fixed: true }); // '1234.50'
 
 // Compact Notation
 formatNumber(1500000000, { isCompact: true }); // '1.5B'
@@ -66,6 +72,7 @@ formatNumber(1500000000, { isCompact: true }); // '1.5B'
 // Special Notations
 formatNumber(0.00005, { notation: 'subscript' }); // '0.0₄5'
 formatNumber(12345, { notation: 'scientific' }); // '1.2345e+4'
+formatNumber(12345, { notation: 'none' }); // '12345'
 ```
 
 ### `FN(value)` - Fluent API
@@ -85,6 +92,7 @@ console.log(formatted); // 'Balance: 1234568 USD'
 
 // Seamlessly combine with compact and notation
 FN(1500).compact({ precision: 1 }).prefix('$').toNumber(); // '$1.5K'
+FN(1500).compact({ precision: 1, fixed: true }).prefix('$').toNumber(); // '$1.5K'
 ```
 
 ### `round(value, options)`
@@ -96,6 +104,7 @@ import { round } from '@peter-present/format-number';
 
 round(1.235, { precision: 2, rounding: 'half' }); // '1.24'
 round(1.235, { precision: 2, rounding: 'down' }); // '1.23'
+round(1.2, { precision: 4, fixed: true }); // '1.2000'
 ```
 
 ## Configuration Reference
@@ -116,10 +125,14 @@ round(1.235, { precision: 2, rounding: 'down' }); // '1.23'
 | :---------- | :---------------------------- | :---------- | :------------------------------------------------- |
 | `precision` | `number`                      | `0`         | Number of decimal places to maintain.              |
 | `rounding`  | `RoundingMode`                | `'half'`    | Strategy used for rounding.                        |
+| `fixed`     | `boolean`                     | `false`     | Pad trailing zeros to match precision.             |
 | `prefix`    | `string`                      | `""`        | Text prepended to the result.                      |
 | `suffix`    | `string`                      | `""`        | Text appended to the result.                       |
 | `isCompact` | `boolean`                     | `false`     | Whether to use K/M/B/T suffixes for large numbers. |
-| `notation`  | `'subscript' \| 'scientific'` | `undefined` | Special formatting for extreme values.             |
+| `notation`  | `'subscript' \| 'scientific' \| 'none'` | `undefined` | Special formatting for extreme values.             |
+| `compactSymbols` | `string[]`                | `undefined` | Override compact symbol set (e.g., `['k','m']`).   |
+
+> Note: by default, trailing zeros are trimmed after rounding. Set `fixed: true` to preserve them.
 
 ## License
 
