@@ -6,6 +6,26 @@ import type {
   SignType,
 } from './types';
 
+type LocaleRegexCacheEntry = { group?: RegExp; decimal?: RegExp };
+const localeRegexCache = new Map<string, LocaleRegexCacheEntry>();
+
+function getLocaleRegexes(
+  groupSeparator?: string,
+  decimalSeparator?: string,
+): LocaleRegexCacheEntry {
+  const key = `${groupSeparator ?? ''}|${decimalSeparator ?? ''}`;
+  const cached = localeRegexCache.get(key);
+  if (cached) return cached;
+  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const entry: LocaleRegexCacheEntry = {};
+  if (groupSeparator) entry.group = new RegExp(escape(groupSeparator), 'g');
+  if (decimalSeparator && decimalSeparator !== '.') {
+    entry.decimal = new RegExp(escape(decimalSeparator), 'g');
+  }
+  localeRegexCache.set(key, entry);
+  return entry;
+}
+
 /**
  * Removes trailing zeros from a decimal string (e.g., '1.500' -> '1.5').
  */
@@ -45,14 +65,9 @@ export function parseNum(value: NumberType, options: ParseNumberParamsType = {})
   if (locale) {
     const groupSeparator = locale.groupSeparator;
     const decimalSeparator = locale.decimalSeparator;
-    if (groupSeparator) {
-      const escaped = groupSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      cleaned = cleaned.replace(new RegExp(escaped, 'g'), '');
-    }
-    if (decimalSeparator && decimalSeparator !== '.') {
-      const escaped = decimalSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      cleaned = cleaned.replace(new RegExp(escaped, 'g'), '.');
-    }
+    const { group, decimal } = getLocaleRegexes(groupSeparator, decimalSeparator);
+    if (group) cleaned = cleaned.replace(group, '');
+    if (decimal) cleaned = cleaned.replace(decimal, '.');
   } else {
     // Default: remove commas for common group separators
     cleaned = cleaned.replace(/,/g, '');

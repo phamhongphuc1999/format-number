@@ -60,4 +60,9 @@ describe('Compacting Tests', () => {
     assert.equal(compact('1500.5'), '1.5005K');
     assert.equal(compact(1000000n), '1M');
   });
+
+  it('should handle string inputs with rounding and fixed precision', () => {
+    assert.equal(compact('999500', { precision: 0 }), '1M');
+    assert.equal(compact('1500', { precision: 2, fixed: true }), '1.50K');
+  });
 });

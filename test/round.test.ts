@@ -119,5 +119,14 @@ describe('Rounding Tests', () => {
       assert.equal(round(9.99, { precision: 1 }), '10');
       assert.equal(round(0.999, { precision: 2 }), '1');
     });
+
+    it('should handle string inputs with large carries', () => {
+      assert.equal(round('999.999', { precision: 2 }), '1000');
+      assert.equal(round('999999999999999.9', { precision: 0 }), '1000000000000000');
+    });
+
+    it('should keep fixed precision at zero decimal places', () => {
+      assert.equal(round('1.0', { precision: 0, fixed: true }), '1');
+    });
   });
 });

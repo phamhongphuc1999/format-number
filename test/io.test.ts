@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert, describe, it } from 'vitest';
 import {
@@ -77,6 +78,13 @@ describe('IO Utility Tests', () => {
       );
     });
 
+    it('should support locale separators with special characters', () => {
+      assert.equal(
+        parseNum("1'234'567,89", { locale: { groupSeparator: "'", decimalSeparator: ',' } }),
+        '1234567.89',
+      );
+    });
+
     it('should allow locale when decimal separator is dot', () => {
       assert.equal(
         parseNum('1,234,567.89', { locale: { groupSeparator: ',', decimalSeparator: '.' } }),
@@ -122,6 +130,7 @@ describe('IO Utility Tests', () => {
       assert.equal(parseNum('.5'), '0.5');
       assert.equal(parseNum('1.'), '1');
       assert.equal(parseNum('null'), '--');
+      assert.equal(parseNum('+-+001.2300'), '-1.23');
     });
 
     it('should expose parseNumber alias', () => {

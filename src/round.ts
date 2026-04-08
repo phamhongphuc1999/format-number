@@ -8,10 +8,20 @@ import type {
 
 function increment(value: string) {
   if (!value) return { result: '', carry: true };
-  const n = BigInt(value) + 1n;
-  const s = n.toString();
-  if (s.length > value.length) return { result: s.slice(1), carry: true };
-  return { result: s.padStart(value.length, '0'), carry: false };
+  const len = value.length;
+  let carry = 1;
+  const out = new Array<string>(len);
+  for (let i = len - 1; i >= 0; i--) {
+    const digit = value.charCodeAt(i) - 48 + carry;
+    if (digit >= 10) {
+      out[i] = '0';
+      carry = 1;
+    } else {
+      out[i] = String.fromCharCode(48 + digit);
+      carry = 0;
+    }
+  }
+  return { result: out.join(''), carry: carry === 1 };
 }
 
 function incInt({ intPart }: BasePositiveNumberType): BasePositiveNumberType {

@@ -70,6 +70,13 @@ describe('Formatting Entry Points', () => {
     it('should allow notation none', () => {
       assert.equal(formatNumber(12345, { notation: 'none' }), '12345');
     });
+
+    it('should handle string inputs with prefix and suffix', () => {
+      assert.equal(
+        formatNumber('12345.6', { precision: 1, prefix: '~', suffix: ' units' }),
+        '~12345.6 units',
+      );
+    });
   });
 
   describe('createFormatFunction', () => {
