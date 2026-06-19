@@ -6,7 +6,6 @@ export {
   clearUnnecessaryZero,
   getBaseNumberNumber,
   parseNum,
-  parseNumber,
 } from './io';
 export { scientific, subscript } from './notation';
 export { round } from './round';

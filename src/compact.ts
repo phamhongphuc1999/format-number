@@ -24,10 +24,7 @@ export function _compact(
     counter = groupsMoved - 1;
   }
 
-  const _result =
-    options.precision != undefined
-      ? _round({ sign, intPart, fracPart }, options)
-      : { sign, intPart, fracPart };
+  const _result = _round({ sign, intPart, fracPart }, options);
 
   let nextInt = _result.intPart;
   let nextFrac = _result.fracPart;

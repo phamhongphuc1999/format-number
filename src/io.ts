@@ -148,8 +148,6 @@ export const getStandardOutput = (value: BaseObjectNumberType): string => {
     : `${value.sign}${value.intPart}`;
 };
 
-export const parseNumber = parseNum;
-
 export function convertToObjectNumber(value: NumberType | ObjectNumberType): ObjectNumberType {
   return typeof value === 'object' && value !== null && 'intPart' in value
     ? (value as ObjectNumberType)

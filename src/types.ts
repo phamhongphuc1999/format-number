@@ -30,6 +30,8 @@ export type NumberConfigType = Partial<{
   suffix: string;
   /** The notation style to apply */
   notation: NotationMode;
+  /** Character used to group digits in the integer part (e.g., ',' → '1,234,567') */
+  groupSeparator: string;
 }>;
 
 export type BasePositiveNumberType = { intPart: string; fracPart: string };
@@ -92,6 +94,13 @@ export type FNType = {
    * @returns The same FNType instance for further chaining.
    */
   suffix(symbol: string): FNType;
+
+  /**
+   * Sets the character used to group digits in the integer part.
+   * @param sep - The separator character (e.g., ',' for 1,234,567).
+   * @returns The same FNType instance for further chaining.
+   */
+  groupSeparator(sep: string): FNType;
 
   /**
    * Finalizes the chain and returns the formatted number as a string.

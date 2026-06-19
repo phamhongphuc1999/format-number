@@ -1,4 +1,4 @@
-import { getBaseNumberNumber, getStandardOutput } from './io';
+import { clearTrailingZero, getBaseNumberNumber, getStandardOutput } from './io';
 import type {
   BaseObjectNumberType,
   BasePositiveNumberType,
@@ -55,8 +55,7 @@ function roundPosUp(value: BasePositiveNumberType, precision = 0): BasePositiveN
 function roundPosDown(value: BasePositiveNumberType, precision = 0): BasePositiveNumberType {
   const { intPart, fracPart } = value;
   if (!fracPart || precision >= fracPart.length) return value;
-  const res = fracPart.slice(0, precision);
-  return { intPart, fracPart: res.replace(/0+$/, '') };
+  return { intPart, fracPart: clearTrailingZero(fracPart.slice(0, precision)) };
 }
 
 function roundPosBanker(value: BasePositiveNumberType, precision = 0): BasePositiveNumberType {
@@ -86,8 +85,9 @@ export function _round(
   value: BaseObjectNumberType,
   options: RoundingConfigType = {},
 ): BaseObjectNumberType {
+  if (options.precision == undefined) return value;
   const mode = options.rounding || 'half';
-  const precision = Math.max(0, options.precision ?? 0);
+  const precision = Math.max(0, options.precision);
   const fixed = options.fixed === true;
   const { sign, intPart, fracPart } = value;
   const posVal = { intPart, fracPart };

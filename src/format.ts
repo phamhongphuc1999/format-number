@@ -11,6 +11,33 @@ import type {
   RoundingConfigType,
 } from './types';
 
+function _applyGroupSeparator(intPart: string, sep: string): string {
+  let result = '';
+  for (let i = 0; i < intPart.length; i++) {
+    if (i > 0 && (intPart.length - i) % 3 === 0) result += sep;
+    result += intPart[i];
+  }
+  return result;
+}
+
+function _assemble(value: ObjectNumberType): string {
+  const { sign, intPart, fracPart, prefix, suffix, compactedSymbol, notation, groupSeparator } =
+    value;
+
+  if (notation === 'scientific') {
+    const sci = scientific({ sign: '', intPart, fracPart });
+    return `${prefix || ''}${sign}${sci}${compactedSymbol || ''}${suffix || ''}`;
+  }
+  if (notation === 'subscript') {
+    const sub = subscript({ sign: '', intPart, fracPart });
+    return `${prefix || ''}${sign}${sub}${compactedSymbol || ''}${suffix || ''}`;
+  }
+
+  const displayInt = groupSeparator ? _applyGroupSeparator(intPart, groupSeparator) : intPart;
+  const result = fracPart.length > 0 ? `${displayInt}.${fracPart}` : displayInt;
+  return `${prefix || ''}${sign}${result}${compactedSymbol || ''}${suffix || ''}`;
+}
+
 function _FN(value: ObjectNumberType): FNType {
   return {
     round: (options?: RoundingConfigType) => {
@@ -36,17 +63,11 @@ function _FN(value: ObjectNumberType): FNType {
     suffix(symbol: string) {
       return _FN({ ...value, suffix: symbol });
     },
+    groupSeparator(sep: string) {
+      return _FN({ ...value, groupSeparator: sep });
+    },
     toNumber() {
-      const { sign, intPart, fracPart, prefix, suffix, compactedSymbol, notation } = value;
-      let result = fracPart.length > 0 ? `${intPart}.${fracPart}` : intPart;
-
-      if (notation === 'scientific') {
-        result = scientific({ sign: '', intPart, fracPart });
-      } else if (notation === 'subscript') {
-        result = subscript({ sign: '', intPart, fracPart });
-      }
-
-      return `${prefix || ''}${sign}${result}${compactedSymbol || ''}${suffix || ''}`;
+      return _assemble(value);
     },
     toObject() {
       return value;
@@ -110,15 +131,9 @@ export function formatNumber(value: NumberType, options: FormattingConfigType = 
   if (options.notation) current = { ...current, notation: options.notation };
   if (options.prefix) current = { ...current, prefix: options.prefix };
   if (options.suffix) current = { ...current, suffix: options.suffix };
+  if (options.groupSeparator) current = { ...current, groupSeparator: options.groupSeparator };
 
-  const { sign, intPart, fracPart, prefix, suffix, compactedSymbol, notation } = current;
-  let result = fracPart.length > 0 ? `${intPart}.${fracPart}` : intPart;
-  if (notation === 'scientific') {
-    result = scientific({ sign: '', intPart, fracPart });
-  } else if (notation === 'subscript') {
-    result = subscript({ sign: '', intPart, fracPart });
-  }
-  return `${prefix || ''}${sign}${result}${compactedSymbol || ''}${suffix || ''}`;
+  return _assemble(current);
 }
 
 /**

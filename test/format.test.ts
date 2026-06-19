@@ -59,8 +59,8 @@ describe('Formatting Entry Points', () => {
       );
     });
 
-    it('should handle empty options', () => {
-      assert.equal(formatNumber(123.45), '123');
+    it('should return value unchanged when no precision is specified', () => {
+      assert.equal(formatNumber(123.45), '123.45');
     });
 
     it('should support fixed precision padding', () => {
@@ -75,6 +75,36 @@ describe('Formatting Entry Points', () => {
       assert.equal(
         formatNumber('12345.6', { precision: 1, prefix: '~', suffix: ' units' }),
         '~12345.6 units',
+      );
+    });
+  });
+
+  describe('groupSeparator', () => {
+    it('should insert separator every 3 digits in formatNumber', () => {
+      assert.equal(formatNumber(1234567, { groupSeparator: ',' }), '1,234,567');
+      assert.equal(formatNumber(1000000, { groupSeparator: '.' }), '1.000.000');
+      assert.equal(formatNumber(123, { groupSeparator: ',' }), '123');
+    });
+
+    it('should work with prefix, suffix, and precision', () => {
+      assert.equal(
+        formatNumber(1234567.89, { groupSeparator: ',', precision: 2, prefix: '$' }),
+        '$1,234,567.89',
+      );
+    });
+
+    it('should work in FN chain', () => {
+      assert.equal(FN(1234567).groupSeparator(',').toNumber(), '1,234,567');
+      assert.equal(
+        FN(9876543.21).round({ precision: 1 }).prefix('$').groupSeparator(',').toNumber(),
+        '$9,876,543.2',
+      );
+    });
+
+    it('should not apply groupSeparator for scientific notation', () => {
+      assert.equal(
+        formatNumber(1234567, { notation: 'scientific', groupSeparator: ',' }),
+        '1.234567e+6',
       );
     });
   });

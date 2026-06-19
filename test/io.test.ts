@@ -1,13 +1,7 @@
 /* eslint-disable quotes */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert, describe, it } from 'vitest';
-import {
-  clearLeadingZero,
-  clearTrailingZero,
-  clearUnnecessaryZero,
-  parseNum,
-  parseNumber,
-} from '../src';
+import { clearLeadingZero, clearTrailingZero, clearUnnecessaryZero, parseNum } from '../src';
 import { convertToObjectNumber } from '../src/io';
 
 describe('IO Utility Tests', () => {
@@ -133,8 +127,8 @@ describe('IO Utility Tests', () => {
       assert.equal(parseNum('+-+001.2300'), '-1.23');
     });
 
-    it('should expose parseNumber alias', () => {
-      assert.equal(parseNumber('1.2K'), '1200');
+    it('should parse suffix shorthand', () => {
+      assert.equal(parseNum('1.2K'), '1200');
     });
   });
 

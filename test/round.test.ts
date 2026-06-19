@@ -15,11 +15,18 @@ describe('Rounding Tests', () => {
       assert.equal(round(-1.236, { precision: 2 }), '-1.24');
     });
 
-    it('should round to integer by default', () => {
-      assert.equal(round(1.4), '1');
-      assert.equal(round(1.5), '2');
-      assert.equal(round(-1.4), '-1');
-      assert.equal(round(-1.5), '-2');
+    it('should return value unchanged when no precision is specified', () => {
+      assert.equal(round(1.4), '1.4');
+      assert.equal(round(1.5), '1.5');
+      assert.equal(round(-1.4), '-1.4');
+      assert.equal(round(-1.5), '-1.5');
+    });
+
+    it('should round to integer when precision is 0', () => {
+      assert.equal(round(1.4, { precision: 0 }), '1');
+      assert.equal(round(1.5, { precision: 0 }), '2');
+      assert.equal(round(-1.4, { precision: 0 }), '-1');
+      assert.equal(round(-1.5, { precision: 0 }), '-2');
     });
 
     it('should handle large numbers', () => {
@@ -65,10 +72,10 @@ describe('Rounding Tests', () => {
   describe('banker', () => {
     it('should round to nearest even neighbor on 0.5', () => {
       // Rounds to even
-      assert.equal(round(1.5, { rounding: 'banker' }), '2');
-      assert.equal(round(2.5, { rounding: 'banker' }), '2');
-      assert.equal(round(3.5, { rounding: 'banker' }), '4');
-      assert.equal(round(4.5, { rounding: 'banker' }), '4');
+      assert.equal(round(1.5, { rounding: 'banker', precision: 0 }), '2');
+      assert.equal(round(2.5, { rounding: 'banker', precision: 0 }), '2');
+      assert.equal(round(3.5, { rounding: 'banker', precision: 0 }), '4');
+      assert.equal(round(4.5, { rounding: 'banker', precision: 0 }), '4');
     });
 
     it('should handle precision with banker rounding', () => {
@@ -77,13 +84,13 @@ describe('Rounding Tests', () => {
     });
 
     it('should handle negative numbers with banker rounding', () => {
-      assert.equal(round(-1.5, { rounding: 'banker' }), '-2');
-      assert.equal(round(-2.5, { rounding: 'banker' }), '-2');
+      assert.equal(round(-1.5, { rounding: 'banker', precision: 0 }), '-2');
+      assert.equal(round(-2.5, { rounding: 'banker', precision: 0 }), '-2');
     });
 
     it('should round normally if not exactly 0.5', () => {
-      assert.equal(round(2.51, { rounding: 'banker' }), '3');
-      assert.equal(round(2.49, { rounding: 'banker' }), '2');
+      assert.equal(round(2.51, { rounding: 'banker', precision: 0 }), '3');
+      assert.equal(round(2.49, { rounding: 'banker', precision: 0 }), '2');
     });
   });
 
